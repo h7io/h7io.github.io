@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blog</title>
+    <description>Various effort notes</description>
+    <link>https://blog.copper.lt/</link>
+    <atom:link href="https://blog.copper.lt/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>Apartment building access control system fix</title>
+        <description>&lt;h3 class=&quot;no_toc&quot; id=&quot;table-of-contents&quot;&gt;Table of contents&lt;/h3&gt;
+&lt;ul id=&quot;markdown-toc&quot;&gt;
+  &lt;li&gt;&lt;a href=&quot;#the-issue&quot; id=&quot;markdown-toc-the-issue&quot;&gt;The issue&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#the-inventory&quot; id=&quot;markdown-toc-the-inventory&quot;&gt;The inventory&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#the-investigation&quot; id=&quot;markdown-toc-the-investigation&quot;&gt;The investigation&lt;/a&gt;    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#controller&quot; id=&quot;markdown-toc-controller&quot;&gt;Controller&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#readers&quot; id=&quot;markdown-toc-readers&quot;&gt;Readers&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#the-fixing&quot; id=&quot;markdown-toc-the-fixing&quot;&gt;The fixing&lt;/a&gt;    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#doubling-up-data-lines&quot; id=&quot;markdown-toc-doubling-up-data-lines&quot;&gt;Doubling up data lines&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#poor-mans-shielding-arrangement&quot; id=&quot;markdown-toc-poor-mans-shielding-arrangement&quot;&gt;Poor-man’s shielding arrangement&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#diodes-with-better-specs&quot; id=&quot;markdown-toc-diodes-with-better-specs&quot;&gt;Diodes with better specs&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#connecting-the-door-magnets&quot; id=&quot;markdown-toc-connecting-the-door-magnets&quot;&gt;Connecting the door magnets&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#managing-the-controller&quot; id=&quot;markdown-toc-managing-the-controller&quot;&gt;Managing the controller&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#conclusion&quot; id=&quot;markdown-toc-conclusion&quot;&gt;Conclusion&lt;/a&gt;    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#further-action&quot; id=&quot;markdown-toc-further-action&quot;&gt;Further action&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;the-issue&quot;&gt;The issue&lt;/h2&gt;
+
+&lt;p&gt;An RFID apartment building access control system is not working. The controller is seeing random IDs each time a tag is read.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-inventory&quot;&gt;The inventory&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1 x C3-400 ZKTeco RFID Multi-Door Controller&lt;/li&gt;
+  &lt;li&gt;6 x whitelabeled, seemingly no-name, wiegand-protocol tag readers “1000-EM”&lt;/li&gt;
+  &lt;li&gt;3 x doors (2 readers for each door)&lt;/li&gt;
+  &lt;li&gt;~100 m. of UTP cable going to each door/reader pair&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;the-investigation&quot;&gt;The investigation&lt;/h2&gt;
+
+&lt;h3 id=&quot;controller&quot;&gt;Controller&lt;/h3&gt;
+
+&lt;p&gt;The controller setup I found:&lt;/p&gt;
+
+&lt;p&gt;&lt;a target=&quot;_blank&quot; class=&quot;nb&quot; href=&quot;/assets/access-control-fix/20220424_182958.jpg&quot;&gt;&lt;img src=&quot;/generated/assets/access-control-fix/20220424_182958-800-8647d77ba.jpg&quot; srcset=&quot;/generated/assets/access-control-fix/20220424_182958-400-8647d77ba.jpg 400w, /generated/assets/access-control-fix/20220424_182958-600-8647d77ba.jpg 600w, /generated/assets/access-control-fix/20220424_182958-800-8647d77ba.jpg 800w, /generated/assets/access-control-fix/20220424_182958-1000-8647d77ba.jpg 1000w&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;At the bottom: the brown/brown-striped cable pairs go to the V- terminal of the magnet locks. While orange/orange-striped go to the V+.&lt;/p&gt;
+
+&lt;p&gt;At the top: cables go to the Wiegand readers. Reader 2 has some more optional lines connected.&lt;/p&gt;
+
+&lt;h3 id=&quot;readers&quot;&gt;Readers&lt;/h3&gt;
+
+&lt;p&gt;The readers are mounted near the door, both side of the wall and share data lines.&lt;/p&gt;
+
+&lt;p&gt;&lt;a target=&quot;_blank&quot; class=&quot;nb&quot; href=&quot;/assets/access-control-fix/20220424_190545.jpg&quot;&gt;&lt;img src=&quot;/generated/assets/access-control-fix/20220424_190545-800-74ca37eef.jpg&quot; srcset=&quot;/generated/assets/access-control-fix/20220424_190545-400-74ca37eef.jpg 400w, /generated/assets/access-control-fix/20220424_190545-600-74ca37eef.jpg 600w, /generated/assets/access-control-fix/20220424_190545-800-74ca37eef.jpg 800w, /generated/assets/access-control-fix/20220424_190545-1000-74ca37eef.jpg 1000w&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;To enable data line sharing - diodes are placed on the D0 and D1 lines.&lt;/p&gt;
+
+&lt;p&gt;&lt;a target=&quot;_blank&quot; class=&quot;nb&quot; href=&quot;/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1.jpg&quot;&gt;&lt;img src=&quot;/generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-800-2e4b85d65.jpg&quot; srcset=&quot;/generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-400-2e4b85d65.jpg 400w, /generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-600-2e4b85d65.jpg 600w, /generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-800-2e4b85d65.jpg 800w, /generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-826-2e4b85d65.jpg 826w&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The diodes I found installed (at least for the one line I checked) were HER107.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-fixing&quot;&gt;The fixing&lt;/h2&gt;
+
+&lt;h3 id=&quot;doubling-up-data-lines&quot;&gt;Doubling up data lines&lt;/h3&gt;
+
+&lt;p&gt;You can see from investigation phase, that the power lines were doubled for the readers (GND and +12V). Expecting a better connection, I changed that to have the data lines doubled instead. The result was the same - garbage data. Seemingly nothing changed.&lt;/p&gt;
+
+&lt;h3 id=&quot;poor-mans-shielding-arrangement&quot;&gt;Poor-man’s shielding arrangement&lt;/h3&gt;
+
+&lt;p&gt;Looking at it further - I noticed that the data lines are from a single pair - orange for D0 and orange-striped for D1. That might cause interference between them, which would degrade the signal &amp;amp; would be a reason for garbage data received at the controller.&lt;/p&gt;
+
+&lt;p&gt;&lt;a target=&quot;_blank&quot; class=&quot;nb&quot; href=&quot;/assets/access-control-fix/drops_full.jpg&quot;&gt;&lt;img src=&quot;/generated/assets/access-control-fix/drops_exc-773-fad706c85.jpg&quot; srcset=&quot;/generated/assets/access-control-fix/drops_exc-400-fad706c85.jpg 400w, /generated/assets/access-control-fix/drops_exc-600-fad706c85.jpg 600w, /generated/assets/access-control-fix/drops_exc-773-fad706c85.jpg 773w&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The cable distances are below 200 m, but still - I used a single line for +12V and moved the data lines to separate twisted pairs and connected a single cable from each twisted pair to GND to act as a “poor man shielding” for the data line. So single cables for +12V, D0 and D1 and 3 x GND cables with two of them as shielding for data lines.&lt;/p&gt;
+
+&lt;h3 id=&quot;diodes-with-better-specs&quot;&gt;Diodes with better specs&lt;/h3&gt;
+
+&lt;p&gt;I tested the new cable arrangement and I actually managed to get data from a single reader, but it was flaky - only about every second/third transmission got to the controller. When I connected the second reader on the lines - it went crashing down and garbage again.&lt;/p&gt;
+
+&lt;p&gt;The shielding document also talked about voltage drops, so I investigated how do the diodes affect the voltage.&lt;/p&gt;
+
+&lt;p&gt;I used UF4007 diodes and the data sheet for them shows a 1.7 volt forward voltage (i.e. voltage drop), which for the reader, I imagine, would be shit-ton enough to cause issues.&lt;/p&gt;
+
+&lt;p&gt;&lt;a target=&quot;_blank&quot; class=&quot;nb&quot; href=&quot;/assets/access-control-fix/datasheet-220-022-1_full.jpg&quot;&gt;&lt;img src=&quot;/generated/assets/access-control-fix/datasheet-220-022-1_exc-800-7432a3d05.jpg&quot; srcset=&quot;/generated/assets/access-control-fix/datasheet-220-022-1_exc-400-7432a3d05.jpg 400w, /generated/assets/access-control-fix/datasheet-220-022-1_exc-600-7432a3d05.jpg 600w, /generated/assets/access-control-fix/datasheet-220-022-1_exc-800-7432a3d05.jpg 800w, /generated/assets/access-control-fix/datasheet-220-022-1_exc-1000-7432a3d05.jpg 1000w&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The original HER107 diodes had the exact same voltage drop.&lt;/p&gt;
+
+&lt;p&gt;To combat this, I looked for more appropriate diodes and found them - Schottky diodes, specifically the 1N5817.&lt;/p&gt;
+
+&lt;p&gt;&lt;a target=&quot;_blank&quot; class=&quot;nb&quot; href=&quot;/assets/access-control-fix/1n5817_19_full.jpg&quot;&gt;&lt;img src=&quot;/generated/assets/access-control-fix/1n5817_19_exc-800-41f6c2ca1.jpg&quot; srcset=&quot;/generated/assets/access-control-fix/1n5817_19_exc-400-41f6c2ca1.jpg 400w, /generated/assets/access-control-fix/1n5817_19_exc-600-41f6c2ca1.jpg 600w, /generated/assets/access-control-fix/1n5817_19_exc-800-41f6c2ca1.jpg 800w, /generated/assets/access-control-fix/1n5817_19_exc-1000-41f6c2ca1.jpg 1000w&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The voltage drop is a more manageable 0.45 volts with RMS voltage and current specs more than enough for the task.&lt;/p&gt;
+
+&lt;p&gt;With this setup - the controller is now receiving the correct data, with no misses!&lt;/p&gt;
+
+&lt;h3 id=&quot;connecting-the-door-magnets&quot;&gt;Connecting the door magnets&lt;/h3&gt;
+
+&lt;p&gt;Looking at how the magnets were connected to the controller (V- to GND, V+ to NC) - I found no match for that arrangement in the controller’s documentation. So I removed those cables and connected as per the “External power supply for NC lock” diagram.&lt;/p&gt;
+
+&lt;p&gt;&lt;a target=&quot;_blank&quot; class=&quot;nb&quot; href=&quot;/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26.jpg&quot;&gt;&lt;img src=&quot;/generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-800-4927aa99e.jpg&quot; srcset=&quot;/generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-400-4927aa99e.jpg 400w, /generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-600-4927aa99e.jpg 600w, /generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-800-4927aa99e.jpg 800w, /generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-880-4927aa99e.jpg 880w&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The power supply is shared between the readers and locks, but it is 5 amps, so should be enough.&lt;/p&gt;
+
+&lt;p&gt;&lt;a target=&quot;_blank&quot; class=&quot;nb&quot; href=&quot;/assets/access-control-fix/20220516_154521.jpg&quot;&gt;&lt;img src=&quot;/generated/assets/access-control-fix/20220516_154521-800-5356bd23f.jpg&quot; srcset=&quot;/generated/assets/access-control-fix/20220516_154521-400-5356bd23f.jpg 400w, /generated/assets/access-control-fix/20220516_154521-600-5356bd23f.jpg 600w, /generated/assets/access-control-fix/20220516_154521-800-5356bd23f.jpg 800w, /generated/assets/access-control-fix/20220516_154521-1000-5356bd23f.jpg 1000w&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;managing-the-controller&quot;&gt;Managing the controller&lt;/h2&gt;
+
+&lt;p&gt;The software that was reported working with this specific controller was ZKAccess. I used the 3.5 version of the software, and as much as I tried - I couldn’t get it to connect to the controller.&lt;/p&gt;
+
+&lt;p&gt;Only after a neighbour suggested setting the timezone of the OS running the software to “China” - I’ve set it to “Beijing” and it connected straight away! Amazing.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;The final wiring on the controller:&lt;/p&gt;
+
+&lt;p&gt;&lt;a target=&quot;_blank&quot; class=&quot;nb&quot; href=&quot;/assets/access-control-fix/20220516_153226.jpg&quot;&gt;&lt;img src=&quot;/generated/assets/access-control-fix/20220516_153226-800-da5380413.jpg&quot; srcset=&quot;/generated/assets/access-control-fix/20220516_153226-400-da5380413.jpg 400w, /generated/assets/access-control-fix/20220516_153226-600-da5380413.jpg 600w, /generated/assets/access-control-fix/20220516_153226-800-da5380413.jpg 800w, /generated/assets/access-control-fix/20220516_153226-1000-da5380413.jpg 1000w&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The controller management software needs a Beijing timezone set on the OS to detect the device!&lt;/li&gt;
+  &lt;li&gt;Using an electronics component (diode) rated higher in one parameter (voltage, current), might have an undesirable trade-off in a more important parameter (forward-voltage, meaning voltage drop), which can ultimately break the system.&lt;/li&gt;
+  &lt;li&gt;Sending different signals over a single twisted pair will be rife with interference.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;further-action&quot;&gt;Further action&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The controller wiring mentions adding diodes near the locks to “protect the access control system against self-induced electromotive force generated by an electronic lock at the instant of switching off/on”. Might look into that to preserve the controller’s longevity.&lt;/li&gt;
+  &lt;li&gt;Figuring out what the optional wires for the readers are might be interesting.&lt;/li&gt;
+  &lt;li&gt;Connecting additional peripherals, like door lock status sensors.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Mon, 16 May 2022 00:00:00 -0500</pubDate>
+        <link>https://blog.copper.lt/2022/05/16/access-control-fix/</link>
+        <guid isPermaLink="true">https://blog.copper.lt/2022/05/16/access-control-fix/</guid>
+      </item>
+    
+  </channel>
+</rss>

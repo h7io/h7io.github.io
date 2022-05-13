@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Apartment building access control system fix &#8211; Blog</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A postmortem and fix for an aparment building access control system">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="">
+    
+    <meta name="keywords" content="">
+    <link rel="canonical" href="https://blog.copper.lt/2022/05/16/access-control-fix/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for Blog" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202205291745" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Apartment building access control system fix">
+    <meta property="og:description" content="Various effort notes">
+    <meta property="og:url" content="https://blog.copper.lt/2022/05/16/access-control-fix/">
+    <meta property="og:site_name" content="Blog">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Apartment building access control system fix" />
+    <meta name="twitter:description" content="A postmortem and fix for an aparment building access control system" />
+    <meta name="twitter:url" content="https://blog.copper.lt/2022/05/16/access-control-fix/" />
+    
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">Blog</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Apartment building access control system fix</h1>
+  <span class="post-meta">2022-05-16</span><br>
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <h3 class="no_toc" id="table-of-contents">Table of contents</h3>
+<ul id="markdown-toc">
+  <li><a href="#the-issue" id="markdown-toc-the-issue">The issue</a></li>
+  <li><a href="#the-inventory" id="markdown-toc-the-inventory">The inventory</a></li>
+  <li><a href="#the-investigation" id="markdown-toc-the-investigation">The investigation</a>    <ul>
+      <li><a href="#controller" id="markdown-toc-controller">Controller</a></li>
+      <li><a href="#readers" id="markdown-toc-readers">Readers</a></li>
+    </ul>
+  </li>
+  <li><a href="#the-fixing" id="markdown-toc-the-fixing">The fixing</a>    <ul>
+      <li><a href="#doubling-up-data-lines" id="markdown-toc-doubling-up-data-lines">Doubling up data lines</a></li>
+      <li><a href="#poor-mans-shielding-arrangement" id="markdown-toc-poor-mans-shielding-arrangement">Poor-man’s shielding arrangement</a></li>
+      <li><a href="#diodes-with-better-specs" id="markdown-toc-diodes-with-better-specs">Diodes with better specs</a></li>
+      <li><a href="#connecting-the-door-magnets" id="markdown-toc-connecting-the-door-magnets">Connecting the door magnets</a></li>
+    </ul>
+  </li>
+  <li><a href="#managing-the-controller" id="markdown-toc-managing-the-controller">Managing the controller</a></li>
+  <li><a href="#conclusion" id="markdown-toc-conclusion">Conclusion</a>    <ul>
+      <li><a href="#further-action" id="markdown-toc-further-action">Further action</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="the-issue">The issue</h2>
+
+<p>An RFID apartment building access control system is not working. The controller is seeing random IDs each time a tag is read.</p>
+
+<h2 id="the-inventory">The inventory</h2>
+
+<ul>
+  <li>1 x C3-400 ZKTeco RFID Multi-Door Controller</li>
+  <li>6 x whitelabeled, seemingly no-name, wiegand-protocol tag readers “1000-EM”</li>
+  <li>3 x doors (2 readers for each door)</li>
+  <li>~100 m. of UTP cable going to each door/reader pair</li>
+</ul>
+
+<h2 id="the-investigation">The investigation</h2>
+
+<h3 id="controller">Controller</h3>
+
+<p>The controller setup I found:</p>
+
+<p><a target="_blank" class="nb" href="/assets/access-control-fix/20220424_182958.jpg"><img src="/generated/assets/access-control-fix/20220424_182958-800-8647d77ba.jpg" srcset="/generated/assets/access-control-fix/20220424_182958-400-8647d77ba.jpg 400w, /generated/assets/access-control-fix/20220424_182958-600-8647d77ba.jpg 600w, /generated/assets/access-control-fix/20220424_182958-800-8647d77ba.jpg 800w, /generated/assets/access-control-fix/20220424_182958-1000-8647d77ba.jpg 1000w"></a></p>
+
+<p>At the bottom: the brown/brown-striped cable pairs go to the V- terminal of the magnet locks. While orange/orange-striped go to the V+.</p>
+
+<p>At the top: cables go to the Wiegand readers. Reader 2 has some more optional lines connected.</p>
+
+<h3 id="readers">Readers</h3>
+
+<p>The readers are mounted near the door, both side of the wall and share data lines.</p>
+
+<p><a target="_blank" class="nb" href="/assets/access-control-fix/20220424_190545.jpg"><img src="/generated/assets/access-control-fix/20220424_190545-800-74ca37eef.jpg" srcset="/generated/assets/access-control-fix/20220424_190545-400-74ca37eef.jpg 400w, /generated/assets/access-control-fix/20220424_190545-600-74ca37eef.jpg 600w, /generated/assets/access-control-fix/20220424_190545-800-74ca37eef.jpg 800w, /generated/assets/access-control-fix/20220424_190545-1000-74ca37eef.jpg 1000w"></a></p>
+
+<p>To enable data line sharing - diodes are placed on the D0 and D1 lines.</p>
+
+<p><a target="_blank" class="nb" href="/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1.jpg"><img src="/generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-800-2e4b85d65.jpg" srcset="/generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-400-2e4b85d65.jpg 400w, /generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-600-2e4b85d65.jpg 600w, /generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-800-2e4b85d65.jpg 800w, /generated/assets/access-control-fix/A054-Connecting-wiegand-readers-in-parallel_v.b1-826-2e4b85d65.jpg 826w"></a></p>
+
+<p>The diodes I found installed (at least for the one line I checked) were HER107.</p>
+
+<h2 id="the-fixing">The fixing</h2>
+
+<h3 id="doubling-up-data-lines">Doubling up data lines</h3>
+
+<p>You can see from investigation phase, that the power lines were doubled for the readers (GND and +12V). Expecting a better connection, I changed that to have the data lines doubled instead. The result was the same - garbage data. Seemingly nothing changed.</p>
+
+<h3 id="poor-mans-shielding-arrangement">Poor-man’s shielding arrangement</h3>
+
+<p>Looking at it further - I noticed that the data lines are from a single pair - orange for D0 and orange-striped for D1. That might cause interference between them, which would degrade the signal &amp; would be a reason for garbage data received at the controller.</p>
+
+<p><a target="_blank" class="nb" href="/assets/access-control-fix/drops_full.jpg"><img src="/generated/assets/access-control-fix/drops_exc-773-fad706c85.jpg" srcset="/generated/assets/access-control-fix/drops_exc-400-fad706c85.jpg 400w, /generated/assets/access-control-fix/drops_exc-600-fad706c85.jpg 600w, /generated/assets/access-control-fix/drops_exc-773-fad706c85.jpg 773w"></a></p>
+
+<p>The cable distances are below 200 m, but still - I used a single line for +12V and moved the data lines to separate twisted pairs and connected a single cable from each twisted pair to GND to act as a “poor man shielding” for the data line. So single cables for +12V, D0 and D1 and 3 x GND cables with two of them as shielding for data lines.</p>
+
+<h3 id="diodes-with-better-specs">Diodes with better specs</h3>
+
+<p>I tested the new cable arrangement and I actually managed to get data from a single reader, but it was flaky - only about every second/third transmission got to the controller. When I connected the second reader on the lines - it went crashing down and garbage again.</p>
+
+<p>The shielding document also talked about voltage drops, so I investigated how do the diodes affect the voltage.</p>
+
+<p>I used UF4007 diodes and the data sheet for them shows a 1.7 volt forward voltage (i.e. voltage drop), which for the reader, I imagine, would be shit-ton enough to cause issues.</p>
+
+<p><a target="_blank" class="nb" href="/assets/access-control-fix/datasheet-220-022-1_full.jpg"><img src="/generated/assets/access-control-fix/datasheet-220-022-1_exc-800-7432a3d05.jpg" srcset="/generated/assets/access-control-fix/datasheet-220-022-1_exc-400-7432a3d05.jpg 400w, /generated/assets/access-control-fix/datasheet-220-022-1_exc-600-7432a3d05.jpg 600w, /generated/assets/access-control-fix/datasheet-220-022-1_exc-800-7432a3d05.jpg 800w, /generated/assets/access-control-fix/datasheet-220-022-1_exc-1000-7432a3d05.jpg 1000w"></a></p>
+
+<p>The original HER107 diodes had the exact same voltage drop.</p>
+
+<p>To combat this, I looked for more appropriate diodes and found them - Schottky diodes, specifically the 1N5817.</p>
+
+<p><a target="_blank" class="nb" href="/assets/access-control-fix/1n5817_19_full.jpg"><img src="/generated/assets/access-control-fix/1n5817_19_exc-800-41f6c2ca1.jpg" srcset="/generated/assets/access-control-fix/1n5817_19_exc-400-41f6c2ca1.jpg 400w, /generated/assets/access-control-fix/1n5817_19_exc-600-41f6c2ca1.jpg 600w, /generated/assets/access-control-fix/1n5817_19_exc-800-41f6c2ca1.jpg 800w, /generated/assets/access-control-fix/1n5817_19_exc-1000-41f6c2ca1.jpg 1000w"></a></p>
+
+<p>The voltage drop is a more manageable 0.45 volts with RMS voltage and current specs more than enough for the task.</p>
+
+<p>With this setup - the controller is now receiving the correct data, with no misses!</p>
+
+<h3 id="connecting-the-door-magnets">Connecting the door magnets</h3>
+
+<p>Looking at how the magnets were connected to the controller (V- to GND, V+ to NC) - I found no match for that arrangement in the controller’s documentation. So I removed those cables and connected as per the “External power supply for NC lock” diagram.</p>
+
+<p><a target="_blank" class="nb" href="/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26.jpg"><img src="/generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-800-4927aa99e.jpg" srcset="/generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-400-4927aa99e.jpg 400w, /generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-600-4927aa99e.jpg 600w, /generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-800-4927aa99e.jpg 800w, /generated/assets/access-control-fix/c3-series-user-manual-v1.2_20141218_26-880-4927aa99e.jpg 880w"></a></p>
+
+<p>The power supply is shared between the readers and locks, but it is 5 amps, so should be enough.</p>
+
+<p><a target="_blank" class="nb" href="/assets/access-control-fix/20220516_154521.jpg"><img src="/generated/assets/access-control-fix/20220516_154521-800-5356bd23f.jpg" srcset="/generated/assets/access-control-fix/20220516_154521-400-5356bd23f.jpg 400w, /generated/assets/access-control-fix/20220516_154521-600-5356bd23f.jpg 600w, /generated/assets/access-control-fix/20220516_154521-800-5356bd23f.jpg 800w, /generated/assets/access-control-fix/20220516_154521-1000-5356bd23f.jpg 1000w"></a></p>
+
+<h2 id="managing-the-controller">Managing the controller</h2>
+
+<p>The software that was reported working with this specific controller was ZKAccess. I used the 3.5 version of the software, and as much as I tried - I couldn’t get it to connect to the controller.</p>
+
+<p>Only after a neighbour suggested setting the timezone of the OS running the software to “China” - I’ve set it to “Beijing” and it connected straight away! Amazing.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The final wiring on the controller:</p>
+
+<p><a target="_blank" class="nb" href="/assets/access-control-fix/20220516_153226.jpg"><img src="/generated/assets/access-control-fix/20220516_153226-800-da5380413.jpg" srcset="/generated/assets/access-control-fix/20220516_153226-400-da5380413.jpg 400w, /generated/assets/access-control-fix/20220516_153226-600-da5380413.jpg 600w, /generated/assets/access-control-fix/20220516_153226-800-da5380413.jpg 800w, /generated/assets/access-control-fix/20220516_153226-1000-da5380413.jpg 1000w"></a></p>
+
+<ul>
+  <li>The controller management software needs a Beijing timezone set on the OS to detect the device!</li>
+  <li>Using an electronics component (diode) rated higher in one parameter (voltage, current), might have an undesirable trade-off in a more important parameter (forward-voltage, meaning voltage drop), which can ultimately break the system.</li>
+  <li>Sending different signals over a single twisted pair will be rife with interference.</li>
+</ul>
+
+<h3 id="further-action">Further action</h3>
+
+<ul>
+  <li>The controller wiring mentions adding diodes near the locks to “protect the access control system against self-induced electromotive force generated by an electronic lock at the instant of switching off/on”. Might look into that to preserve the controller’s longevity.</li>
+  <li>Figuring out what the optional wires for the readers are might be interesting.</li>
+  <li>Connecting additional peripherals, like door lock status sensors.</li>
+</ul>
+
+</article>
+
+
+
+
+
+
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname  = 'varis-blog';
+    var disqus_identifier = '/2022/05/16/access-control-fix';
+    var disqus_title      = "Apartment building access control system fix";
+
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      © Copper
+    </small>
+  </div>
+</footer>
+<!-- AnchorJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.0.0/anchor.min.js"></script>
+<script>
+    anchors.options.visible = 'always';
+    anchors.add('article h2, article h3, article h4, article h5, article h6');
+</script>
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>
